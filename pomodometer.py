@@ -27,10 +27,10 @@ ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
 x = 0
 projects = ['first project', 'second project', 'third project']
-savings = [50000, 100000, 100000]
+savings = [50000, 100000, 100001]
 goal = 1000000
 # TODO persistent goal
-imagePath = 'pomodometer\image.jpg'
+imagePath = 'image.jpg'
 
 
 class App(QMainWindow):
@@ -44,7 +44,7 @@ class App(QMainWindow):
         self.height = 600
         self.initUI()
         # set window icon (see above for taskbar)
-        self.setWindowIcon(QIcon('pomodometer\exit243.png'))
+        self.setWindowIcon(QIcon('exit243.png'))
 
     def initUI(self):
         self.setWindowTitle(self.title)
@@ -60,14 +60,14 @@ class App(QMainWindow):
         # TODO menu: help: about: webkit pointing to Energy Trust SEM website
         # (note that this is not endorsed)
 
-        exitButton = QAction(QIcon('pomodometer\exit243.png'), 'Exit', self)
+        exitButton = QAction(QIcon('exit243.png'), 'Exit', self)
         # exitButton.setShortcut('Ctrl+Q')
         exitButton.setShortcut('Ctrl+W')
         exitButton.setStatusTip('Exit application')
         exitButton.triggered.connect(self.close)
         fileMenu.addAction(exitButton)
 
-        ChangeBackgroundImage = QAction(QIcon('pomodometer\exit243.png'),
+        ChangeBackgroundImage = QAction(QIcon('exit243.png'),
                                         'Change Background Image', self)
         ChangeBackgroundImage.setStatusTip('Choose new background image from \
                                             disk')
@@ -105,7 +105,7 @@ class MyMainWidget(QWidget):
         # CHANGED replace background image with matplotlib
         # Create widget
         # label1 = QLabel(self)
-        # pixmap = QPixmap('pomodometer\image.jpg')
+        # pixmap = QPixmap('image.jpg')
         # label1.setPixmap(pixmap)
         # #self.resize(pixmap.width() + 250, pixmap.height())
         # self.setMinimumSize(pixmap.width() + 250, pixmap.height())
@@ -133,9 +133,9 @@ class MyMainWidget(QWidget):
         self.plotLayout.addWidget(self.button)
         # self.setLayout(layout)
 
-        with open('pomodometer/Projects.txt') as f:
+        with open('Projects.txt') as f:
             projectsText = f.readlines()
-        with open('pomodometer/Savings.txt') as f:
+        with open('Savings.txt') as f:
             savingsText = f.readlines()
         # Create table for projects
         self.createTable(max(len(projectsText), len(savingsText))+1)
@@ -163,7 +163,7 @@ class MyMainWidget(QWidget):
 
         # HACK Create widget for small image overlay
         label2 = QLabel(self)
-        pixmap = QPixmap('pomodometer\exit243.png')
+        pixmap = QPixmap('exit243.png')
         label2.setPixmap(pixmap)
         label2.move(300, 50)
 
@@ -173,7 +173,7 @@ class MyMainWidget(QWidget):
     def savings_calc(self):
         # populate total project savings
         sumTotal = 0
-        with open('pomodometer/Savings.txt') as f:
+        with open('Savings.txt') as f:
             savingsText = f.readlines()
             for i in range(0, len(savingsText)):
                 # if isinstance(savingsText[i], int):
@@ -262,8 +262,8 @@ class MyMainWidget(QWidget):
 
         # Store description and savings values between sessions
         # probably easiest by reading from and storing to between csv/txt files
-        # with open('pomodometer/projectData.csv', 'r') as f:  # for 2 columns
-        # with open('pomodometer/projectData.csv') as f:
+        # with open('projectData.csv', 'r') as f:  # for 2 columns
+        # with open('projectData.csv') as f:
         #     reader = csv.reader(f, delimiter=",")
         #     your_list = list(reader)
 
@@ -272,15 +272,15 @@ class MyMainWidget(QWidget):
         #  ['This is the second line', 'Line2'],
         #  ['This is the third line', 'Line3']]
 
-        # my_data = genfromtxt('pomodometer/Projects.txt', delimiter=',')
+        # my_data = genfromtxt('Projects.txt', delimiter=',')
 
-        with open('pomodometer/Projects.txt') as f:
+        with open('Projects.txt') as f:
             projectsText = f.readlines()
         for i in range(0, len(projectsText)):
             self.tableWidget.setItem(i, 0, QTableWidgetItem(
                 str(projectsText[i])))
 
-        with open('pomodometer/Savings.txt') as f:
+        with open('Savings.txt') as f:
             savingsText = f.readlines()
         for i in range(0, len(savingsText)):
             self.tableWidget.setItem(i, 1, QTableWidgetItem(
@@ -294,18 +294,18 @@ class MyMainWidget(QWidget):
     def on_click(self):
 
         # rewrite projects and savings after change
-        with open('pomodometer/Projects.txt', 'w') as f:
+        with open('Projects.txt', 'w') as f:
             f.seek(0)
             f.truncate()
-        with open('pomodometer/Projects.txt', 'w') as f:
+        with open('Projects.txt', 'w') as f:
             for i in range(0, self.tableWidget.rowCount()):
                 if self.tableWidget.item(i, 0):
                     f.write(self.tableWidget.item(i, 0).text().rstrip())
                     f.write('\n')
-        with open('pomodometer/Savings.txt', 'w') as f:
+        with open('Savings.txt', 'w') as f:
             f.seek(0)
             f.truncate()
-        with open('pomodometer/Savings.txt', 'w') as f:
+        with open('Savings.txt', 'w') as f:
             for i in range(0, self.tableWidget.rowCount()):
                 if self.tableWidget.item(i, 1):
                     f.write(self.tableWidget.item(i, 1).text().rstrip())
@@ -331,9 +331,9 @@ class MyMainWidget(QWidget):
             # BUG crashes if text is entered in project description before
             # savings is entered because savings cell is null so it doesn't
             # have a text property
-            with open('pomodometer/Savings.txt') as f:
+            with open('Savings.txt') as f:
                 savingsText = f.readlines()
-            with open('pomodometer/Projects.txt') as f:
+            with open('Projects.txt') as f:
                 projectsText = f.readlines()
             # print(len(savingsText))
             # print(self.tableWidget.rowCount())
