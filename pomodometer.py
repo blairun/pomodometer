@@ -170,6 +170,7 @@ class MyMainWidget(QWidget):
         # Show widgets
         self.show()
 
+    # TODO Consolidate all calls to savings.txt and projects.txt
     def savings_calc(self):
         # populate total project savings
         sumTotal = 0
