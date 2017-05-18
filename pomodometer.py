@@ -213,7 +213,7 @@ class MyMainWidget(QWidget):
         # add backgroudn image to plot. See
         # http://stackoverflow.com/questions/34458251/plot-over-an-image-background-in-python
         img = plt.imread(imagePath)
-        print(imagePath)
+        # print(imagePath)
         # subplot grid parameters encoded as a single integer. "111" means
         # "1x1 grid, first subplot" and "234" means "2x3 grid, 4th subplot"
         ax = self.figure.add_subplot(111)
