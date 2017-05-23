@@ -28,7 +28,7 @@ ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 x = 0
 projects = ['first project', 'second project', 'third project']
 savings = [50000, 100000, 100001]
-goal = 1000000
+# goal = 1000000
 # TODO persistent goal
 imagePath = 'image.jpg'
 
@@ -93,9 +93,10 @@ class App(QMainWindow):
             global imagePath
             imagePath = fileName
             # print(imagePath)
-            m = MyMainWidget(App())
-            # m.backgroundImage()
-            # m.canvas.draw()
+            # m = MyMainWidget(App())
+            # m.background_image()
+            # MyMainWidget.background_image()
+            # TODO refer to mymainwidget from outside of the class
 
 
 class MyMainWidget(QWidget):
@@ -137,6 +138,8 @@ class MyMainWidget(QWidget):
             projectsText = f.readlines()
         with open('Savings.txt') as f:
             savingsText = f.readlines()
+        # with open('goal.txt') as f:
+        #     goal = f.readlines()
         # Create table for projects
         self.createTable(max(len(projectsText), len(savingsText))+1)
 
@@ -144,14 +147,27 @@ class MyMainWidget(QWidget):
         # button = QPushButton('PyQt5 button', self)
         # button.setToolTip('This is an example button')
 
-        self.label3 = QLabel('', self)
+        self.labelSavings = QLabel('', self)
         self.savings_calc()
+
+        # self.goal_calc()
+        # self.labelGoal = QLabel('Goal: ' + '{:,}'.format(int(goal[0])), self)
+        self.labelGoal = QLabel('Goal: ' + '{:,}'.format(self.goal_calc()), self)
+
+        # self.labelGoal.doubleClicked.connect(self.dbl_click)
+        self.labelGoal.mousePressEvent = self.dbl_click
+
+        # nested savings and goal layout
+        self.SavingsGoalLayout = QHBoxLayout()
+        self.SavingsGoalLayout.addWidget(self.labelSavings)
+        self.SavingsGoalLayout.addWidget(self.labelGoal)
 
         # create vertical layout widget for table and button
         self.tablelayout = QVBoxLayout()
         self.tablelayout.addWidget(self.tableWidget)
-        self.tablelayout.addWidget(self.label3)
-        # TODO 2 show goal next to savings value
+        self.tablelayout.addLayout(self.SavingsGoalLayout)
+
+        # TODO update goal after clicking it
         # self.tablelayout.addWidget(button)
         # self.setLayout(self.tablelayout)
 
@@ -183,23 +199,34 @@ class MyMainWidget(QWidget):
                 except ValueError:
                     continue
                 sumTotal = int(savingsText[i]) + sumTotal
-        self.label3.setText('Total Savings: '
-                            + '{:,}'.format(sumTotal))
+        self.labelSavings.setText('Total Savings: '
+                                  + '{:,}'.format(sumTotal))
         return sumTotal
 
-    def backgroundImage(self):
-        img = plt.imread(imagePath)
-        print(imagePath)
-        self.canvas.draw()
 
-    def plot(self):
+    def goal_calc(self):
+        # populate total project savings
+        with open('goal.txt') as f:
+            return int(f.readlines()[0])
+
+
+    @classmethod
+    def background_image(cls):
+        img = plt.imread(imagePath)
+        # ax = cls.figure.add_subplot(111)
+        # ax.imshow(img, extent=[0, 1000, 0, 1000])
+        print(imagePath)
+        cls.canvas.draw()
+
+    #@staticmethod
+    def plot(cls):
         ''' plot some random stuff '''
         # random data
         # data = [random.random() for i in range(10)]
         # i = [random.random() * 1000]
 
         # Adjust parabola based on savings value
-        percent = self.savings_calc() / goal
+        percent = cls.savings_calc() / cls.goal_calc()
         if percent > 1:
             percent = 1
 
@@ -208,15 +235,15 @@ class MyMainWidget(QWidget):
         h = 500 * percent    # adjusts midpoint, max 500
         k = 1000 * percent   # adjusts height, max 1000
 
-        self.figure.clear()
+        cls.figure.clear()
 
-        # add backgroudn image to plot. See
+        # add background image to plot. See
         # http://stackoverflow.com/questions/34458251/plot-over-an-image-background-in-python
         img = plt.imread(imagePath)
         # print(imagePath)
         # subplot grid parameters encoded as a single integer. "111" means
         # "1x1 grid, first subplot" and "234" means "2x3 grid, 4th subplot"
-        ax = self.figure.add_subplot(111)
+        ax = cls.figure.add_subplot(111)
         ax.imshow(img, extent=[0, 1000, 0, 1000])
         axes = plt.gca()
         axes.set_xlim([0, 1000])
@@ -245,7 +272,7 @@ class MyMainWidget(QWidget):
             x += 100
 
         # refresh canvas
-        self.canvas.draw()
+        cls.canvas.draw()
         # TODO 1 see if you can recreate simple_animation.py here
 
     def createTable(self, rows):
@@ -356,7 +383,12 @@ class MyMainWidget(QWidget):
         #     if self.tableWidget.item(i, 1):
         #         sumTotal = int(self.tableWidget.item(i, 1).text()) + sumTotal
         # print('{:,}'.format(sumTotal))
-        # self.label3.setText('Total Savings: ' + '{:,}'.format(sumTotal))
+        # self.labelSavings.setText('Total Savings: ' + '{:,}'.format(sumTotal))
+
+    def dbl_click(self, event):
+        # TODO add input box for new goal value
+        goal_input = input('Enter the new goal: ')
+        print('new goal: ', goal_input)
 
 
 if __name__ == '__main__':
@@ -365,4 +397,4 @@ if __name__ == '__main__':
     sys.exit(app.exec_())
     # unittest.main()
     # TODO package app
-    # TODO 2 learn how to store methods and funcitons in seperate .py files
+    # TODO 2 learn how to store classes and functions in separate .py files
