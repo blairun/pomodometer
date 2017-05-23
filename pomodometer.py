@@ -74,6 +74,9 @@ class App(QMainWindow):
         ChangeBackgroundImage.triggered.connect(self.openFileNameDialog)
         editMenu.addAction(ChangeBackgroundImage)
 
+        # pass reference to the canvas to the App. Make a few changes
+        # to the App initializer to accomodate canvas reference.
+        # Then bind it to App instance
         self.table_widget = MyMainWidget(self)
         self.setCentralWidget(self.table_widget)
         self.statusBar().showMessage('splat')
@@ -96,6 +99,8 @@ class App(QMainWindow):
             # m = MyMainWidget(App())
             # m.background_image()
             # MyMainWidget.background_image()
+            # MyMainWidget.canvas.draw()
+            # https://stackoverflow.com/questions/4618435/tkinter-canvas-access-from-a-separate-class
             # TODO refer to mymainwidget from outside of the class
 
 
@@ -219,14 +224,14 @@ class MyMainWidget(QWidget):
         cls.canvas.draw()
 
     #@staticmethod
-    def plot(cls):
+    def plot(self):
         ''' plot some random stuff '''
         # random data
         # data = [random.random() for i in range(10)]
         # i = [random.random() * 1000]
 
         # Adjust parabola based on savings value
-        percent = cls.savings_calc() / cls.goal_calc()
+        percent = self.savings_calc() / self.goal_calc()
         if percent > 1:
             percent = 1
 
@@ -235,7 +240,7 @@ class MyMainWidget(QWidget):
         h = 500 * percent    # adjusts midpoint, max 500
         k = 1000 * percent   # adjusts height, max 1000
 
-        cls.figure.clear()
+        self.figure.clear()
 
         # add background image to plot. See
         # http://stackoverflow.com/questions/34458251/plot-over-an-image-background-in-python
@@ -243,7 +248,7 @@ class MyMainWidget(QWidget):
         # print(imagePath)
         # subplot grid parameters encoded as a single integer. "111" means
         # "1x1 grid, first subplot" and "234" means "2x3 grid, 4th subplot"
-        ax = cls.figure.add_subplot(111)
+        ax = self.figure.add_subplot(111)
         ax.imshow(img, extent=[0, 1000, 0, 1000])
         axes = plt.gca()
         axes.set_xlim([0, 1000])
@@ -272,7 +277,7 @@ class MyMainWidget(QWidget):
             x += 100
 
         # refresh canvas
-        cls.canvas.draw()
+        self.canvas.draw()
         # TODO 1 see if you can recreate simple_animation.py here
 
     def createTable(self, rows):
