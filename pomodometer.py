@@ -26,8 +26,10 @@ myappid = 'mycompany.myproduct.subproduct.version'  # arbitrary string
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
 x = 0
-projects = ['first project', 'second project', 'third project']
-savings = [50000, 100000, 100001]
+y = 0
+percent = 0
+# projects = ['first project', 'second project', 'third project']
+# savings = [50000, 100000, 100001]
 # goal = 1000000
 # TODO persistent goal
 imagePath = 'image.jpg'
@@ -92,6 +94,10 @@ class App(QMainWindow):
             # print(fileName)
             global imagePath
             imagePath = fileName
+            self.table_widget = MyMainWidget(self)
+            self.setCentralWidget(self.table_widget)
+            global x
+            x = 0
             # print(imagePath)
             # m = MyMainWidget(App())
             # m.background_image()
@@ -152,7 +158,8 @@ class MyMainWidget(QWidget):
 
         # self.goal_calc()
         # self.labelGoal = QLabel('Goal: ' + '{:,}'.format(int(goal[0])), self)
-        self.labelGoal = QLabel('Goal: ' + '{:,}'.format(self.goal_calc()), self)
+        self.labelGoal = QLabel('Goal: ' +
+                                '{:,}'.format(self.goal_calc()), self)
 
         # self.labelGoal.doubleClicked.connect(self.dbl_click)
         self.labelGoal.mousePressEvent = self.dbl_click
@@ -203,12 +210,10 @@ class MyMainWidget(QWidget):
                                   + '{:,}'.format(sumTotal))
         return sumTotal
 
-
     def goal_calc(self):
         # populate total project savings
         with open('goal.txt') as f:
             return int(f.readlines()[0])
-
 
     @classmethod
     def background_image(cls):
@@ -218,15 +223,23 @@ class MyMainWidget(QWidget):
         print(imagePath)
         cls.canvas.draw()
 
-    #@staticmethod
-    def plot(cls):
-        ''' plot some random stuff '''
-        # random data
-        # data = [random.random() for i in range(10)]
-        # i = [random.random() * 1000]
+    # initialization function: plot the background of each frame
+    @staticmethod
+    def init_plot():
+        plt.imshow(img, extent=(0, 1000, 0, 1000))
 
-        # Adjust parabola based on savings value
-        percent = cls.savings_calc() / cls.goal_calc()
+    @staticmethod
+    def updatefig(i):
+        # global x, y
+        i += 1
+        # plt.imshow(im2, extent=(0, 50, 0, 50))
+        # data =
+        # img_p.set_data(data)
+        # self.canvas.draw()
+        # plt.clf()
+        # plt.draw()
+        # img = plt.imread(imagePath)
+        global percent
         if percent > 1:
             percent = 1
 
@@ -234,6 +247,36 @@ class MyMainWidget(QWidget):
         a = -0.004 / percent  # adjusts stretch, min -100, max -0.004
         h = 500 * percent    # adjusts midpoint, max 500
         k = 1000 * percent   # adjusts height, max 1000
+        global x
+        global y
+
+        if x >= k:
+            x = k
+        else:
+            x = i
+
+        y = a * (x - h) ** 2 + k
+
+        im2 = plt.imread("exit243.png")
+        plt.imshow(im2, extent=(x, x+25, y, y+25))
+
+    # @staticmethod
+    def plot(cls):
+        ''' plot some random stuff '''
+        # random data
+        # data = [random.random() for i in range(10)]
+        # i = [random.random() * 1000]
+
+        # Adjust parabola based on savings value
+        global percent
+        percent = cls.savings_calc() / cls.goal_calc()
+        # if percent > 1:
+        #     percent = 1
+
+        # define parabola based on magnitude of kwh/joules
+        # a = -0.004 / percent  # adjusts stretch, min -100, max -0.004
+        # h = 500 * percent    # adjusts midpoint, max 500
+        # k = 1000 * percent   # adjusts height, max 1000
 
         cls.figure.clear()
 
@@ -259,18 +302,21 @@ class MyMainWidget(QWidget):
         # i = int(self.tableWidget.item(0, 1).text())
         # for i in range(0 To k):
         # x = i
-        global x
-        y = a * (x - h) ** 2 + k
+        # global x
+        # y = a * (x - h) ** 2 + k
         # Next
         # self.tableWidget.setItem(0, 1, QTableWidgetItem(str(i + 100)))
 
-        ax.plot(x, y, 'o', color='firebrick')
+        # ax.plot(x, y, 'o', color='firebrick')
 
-        if x >= k:
-            x = k
-        else:
-            x += 100
+        # if x >= k:
+        #     x = k
+        # else:
+        #     x += 100
 
+        ani = animation.FuncAnimation(cls.figure, cls.updatefig,
+                                      interval=100)
+        # init_func=cls.init_plot,
         # refresh canvas
         cls.canvas.draw()
         # TODO 1 see if you can recreate simple_animation.py here
@@ -383,7 +429,8 @@ class MyMainWidget(QWidget):
         #     if self.tableWidget.item(i, 1):
         #         sumTotal = int(self.tableWidget.item(i, 1).text()) + sumTotal
         # print('{:,}'.format(sumTotal))
-        # self.labelSavings.setText('Total Savings: ' + '{:,}'.format(sumTotal))
+        # self.labelSavings.setText('Total Savings: ' +
+        #                           '{:,}'.format(sumTotal))
 
     def dbl_click(self, event):
         # TODO add input box for new goal value
