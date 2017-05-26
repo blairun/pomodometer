@@ -76,6 +76,9 @@ class App(QMainWindow):
         ChangeBackgroundImage.triggered.connect(self.openFileNameDialog)
         editMenu.addAction(ChangeBackgroundImage)
 
+        # pass reference to the canvas to the App. Make a few changes
+        # to the App initializer to accomodate canvas reference.
+        # Then bind it to App instance
         self.table_widget = MyMainWidget(self)
         self.setCentralWidget(self.table_widget)
         self.statusBar().showMessage('splat')
@@ -102,6 +105,8 @@ class App(QMainWindow):
             # m = MyMainWidget(App())
             # m.background_image()
             # MyMainWidget.background_image()
+            # MyMainWidget.canvas.draw()
+            # https://stackoverflow.com/questions/4618435/tkinter-canvas-access-from-a-separate-class
             # TODO refer to mymainwidget from outside of the class
 
 
@@ -272,13 +277,15 @@ class MyMainWidget(QWidget):
         percent = cls.savings_calc() / cls.goal_calc()
         # if percent > 1:
         #     percent = 1
+        if percent > 1:
+            percent = 1
 
         # define parabola based on magnitude of kwh/joules
         # a = -0.004 / percent  # adjusts stretch, min -100, max -0.004
         # h = 500 * percent    # adjusts midpoint, max 500
         # k = 1000 * percent   # adjusts height, max 1000
 
-        cls.figure.clear()
+        self.figure.clear()
 
         # add background image to plot. See
         # http://stackoverflow.com/questions/34458251/plot-over-an-image-background-in-python
@@ -286,7 +293,7 @@ class MyMainWidget(QWidget):
         # print(imagePath)
         # subplot grid parameters encoded as a single integer. "111" means
         # "1x1 grid, first subplot" and "234" means "2x3 grid, 4th subplot"
-        ax = cls.figure.add_subplot(111)
+        ax = self.figure.add_subplot(111)
         ax.imshow(img, extent=[0, 1000, 0, 1000])
         axes = plt.gca()
         axes.set_xlim([0, 1000])
@@ -318,7 +325,7 @@ class MyMainWidget(QWidget):
                                       interval=100)
         # init_func=cls.init_plot,
         # refresh canvas
-        cls.canvas.draw()
+        self.canvas.draw()
         # TODO 1 see if you can recreate simple_animation.py here
 
     def createTable(self, rows):
