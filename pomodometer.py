@@ -1,10 +1,11 @@
 import sys
 
+from PyQt5 import QtCore
 from PyQt5.QtCore import pyqtSlot
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMenu, QWidget, \
-    QLabel, QAction, QTableWidget, QTableWidgetItem, QVBoxLayout, \
-    QHBoxLayout, QBoxLayout, QPushButton, QFileDialog, QSizePolicy, QMessageBox
+    QLabel, QAction, QTableWidget, QTableWidgetItem, QVBoxLayout, QTextEdit, \
+    QHBoxLayout, QBoxLayout, QPushButton, QFileDialog, QSizePolicy, QMessageBox, QLineEdit
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as \
     FigureCanvas
@@ -13,6 +14,8 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as \
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+
+import locale
 
 import random
 import numpy as np
@@ -30,10 +33,9 @@ y = 0
 percent = 0
 # projects = ['first project', 'second project', 'third project']
 # savings = [50000, 100000, 100001]
-# goal = 1000000
-# TODO persistent goal
+goal = ""
 imagePath = 'image.jpg'
-
+anim_running = True
 
 class App(QMainWindow):
 
@@ -135,7 +137,7 @@ class MyMainWidget(QWidget):
         # self.toolbar = NavigationToolbar(self.canvas, self)
 
         # Just a button connected to `plot` method
-        self.button = QPushButton('Plot')
+        self.button = QPushButton('Throw!')
         self.button.clicked.connect(self.plot)
         # TODO enable button to run matplotlib animation
 
@@ -161,20 +163,29 @@ class MyMainWidget(QWidget):
 
         self.labelSavings = QLabel('', self)
         self.savings_calc()
+        self.labelSavings.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
 
         # self.goal_calc()
         # self.labelGoal = QLabel('Goal: ' + '{:,}'.format(int(goal[0])), self)
-        self.labelGoal = QLabel('Goal: ' +
-                                '{:,}'.format(self.goal_calc()), self)
+        self.labelGoal = QLabel('Goal: ')  # +
+        #                       '{:,}'.format(self.goal_calc()), self)
+        self.labelGoal.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
 
         # self.labelGoal.doubleClicked.connect(self.dbl_click)
-        self.labelGoal.mousePressEvent = self.dbl_click
+        # self.labelGoal.mousePressEvent = self.dbl_click
+        # TODO enable goal update
+
+        self.textGoalEdit = QLineEdit()
+        self.textGoalEdit.setFixedWidth(80)
+        self.textGoalEdit.setAlignment(QtCore.Qt.AlignLeft)
+        self.textGoalEdit.setText(str('{:,}'.format(self.goal_calc())))
+        self.textGoalEdit.textEdited.connect(self.update_goal)
 
         # nested savings and goal layout
         self.SavingsGoalLayout = QHBoxLayout()
-        self.SavingsGoalLayout.addWidget(self.labelGoal)
-        self.SavingsGoalLayout.addWidget(self.labelSavings)
-        # TODO right orient
+        self.SavingsGoalLayout.addWidget(self.labelGoal, 0)
+        self.SavingsGoalLayout.addWidget(self.textGoalEdit, 0)
+        self.SavingsGoalLayout.addWidget(self.labelSavings, 1)
 
         # create vertical layout widget for table and button
         self.tablelayout = QVBoxLayout()
@@ -187,8 +198,8 @@ class MyMainWidget(QWidget):
 
         # set a horizontal layout, add plot and table layouts
         self.layout = QHBoxLayout()
-        self.layout.addLayout(self.plotLayout)
-        self.layout.addLayout(self.tablelayout)
+        self.layout.addLayout(self.plotLayout, 3)
+        self.layout.addLayout(self.tablelayout, 1)
         self.setLayout(self.layout)
 
         # HACK Create widget for small image overlay
@@ -196,6 +207,7 @@ class MyMainWidget(QWidget):
         # pixmap = QPixmap('exit243.png')
         # label2.setPixmap(pixmap)
         # label2.move(300, 50)
+
 
         # Show widgets
         self.show()
@@ -218,9 +230,39 @@ class MyMainWidget(QWidget):
         return sumTotal
 
     def goal_calc(self):
+        locale.setlocale(locale.LC_ALL, '')
         # populate total project savings
         with open('goal.txt') as f:
-            return int(f.readlines()[0])
+            goaltext = f.readlines()
+            global goal
+            # print(goal)
+            goal = locale.atoi(goaltext[0])
+            # print(goal)
+            return goal
+
+    def update_goal(self):
+        global goal
+        # check if goal is an integer
+        # print(goal)
+        try:
+            locale.atoi(self.textGoalEdit.text())
+            # print(goal)
+            goal = locale.atoi(self.textGoalEdit.text())
+        except ValueError:
+            print("error")
+
+        # set min and max
+        if goal < 1: goal = 1
+        if goal > 9999999999: goal = 9999999999
+
+        # update persistent goal and textbox
+        with open('goal.txt', 'w') as f:
+            f.seek(0)
+            f.truncate()
+            # f.write(str(goal))
+            f.write(str('{:,}'.format(goal)))
+            print(goal)
+        self.textGoalEdit.setText(str('{:,}'.format(goal)))
 
     @classmethod
     def background_image(cls):
@@ -339,12 +381,24 @@ class MyMainWidget(QWidget):
         #     x = k
         # else:
         #     x += 100
+        self.button.setText('Throw Again!')
 
         # print(percent*1000)
         ani = animation.FuncAnimation(self.figure, self.updatefig, repeat=False,
                                       interval=1, frames=int(percent*1000)+2)
         # init_func=cls.init_plot,
         # refresh canvas
+
+        # Pause and restart animation
+        global anim_running
+        print(anim_running)
+        if anim_running:
+            ani.event_source.stop()
+            anim_running = False
+        else:
+            ani.event_source.start()
+            anim_running = True
+
         self.canvas.draw()
 
     def createTable(self, rows):
@@ -353,9 +407,10 @@ class MyMainWidget(QWidget):
         self.tableWidget.setRowCount(rows)
         self.tableWidget.setColumnCount(2)
         self.tableWidget.setHorizontalHeaderLabels(['Project Description',
-                                                   'Savings Value'])
+                                                    'Savings Value'])
         self.tableWidget.horizontalHeader().setSectionResizeMode(0, 1)
         self.tableWidget.setColumnWidth(1, 100)
+        # self.tableWidget.resizeColumnsToContents()
         # IDEA limit column 2 to numbers
         # self.tableWidget.setItem(0,0, QTableWidgetItem("Cell (1,1)"))
         # self.tableWidget.move(1,1)
@@ -450,13 +505,13 @@ class MyMainWidget(QWidget):
                 # print(self.tableWidget.rowCount())
                 # self.tableWidget.setItem(rowPosition , 0,
                 #                          QtGui.QTableWidgetItem("text1"))
-        # sumTotal = 0
-        # for i in range(0, self.tableWidget.rowCount()-1):
-        #     if self.tableWidget.item(i, 1):
-        #         sumTotal = int(self.tableWidget.item(i, 1).text()) + sumTotal
-        # print('{:,}'.format(sumTotal))
-        # self.labelSavings.setText('Total Savings: ' +
-        #                           '{:,}'.format(sumTotal))
+                # sumTotal = 0
+                # for i in range(0, self.tableWidget.rowCount()-1):
+                #     if self.tableWidget.item(i, 1):
+                #         sumTotal = int(self.tableWidget.item(i, 1).text()) + sumTotal
+                # print('{:,}'.format(sumTotal))
+                # self.labelSavings.setText('Total Savings: ' +
+                #                           '{:,}'.format(sumTotal))
 
     def dbl_click(self, event):
         # TODO add input box for new goal value
