@@ -82,6 +82,7 @@ class App(QMainWindow):
         self.table_widget = MyMainWidget(self)
         self.setCentralWidget(self.table_widget)
         self.statusBar().showMessage('splat')
+        # TODO call this from the plt method below
 
         self.show()
 
@@ -171,8 +172,9 @@ class MyMainWidget(QWidget):
 
         # nested savings and goal layout
         self.SavingsGoalLayout = QHBoxLayout()
-        self.SavingsGoalLayout.addWidget(self.labelSavings)
         self.SavingsGoalLayout.addWidget(self.labelGoal)
+        self.SavingsGoalLayout.addWidget(self.labelSavings)
+        # TODO right orient
 
         # create vertical layout widget for table and button
         self.tablelayout = QVBoxLayout()
@@ -190,10 +192,10 @@ class MyMainWidget(QWidget):
         self.setLayout(self.layout)
 
         # HACK Create widget for small image overlay
-        label2 = QLabel(self)
-        pixmap = QPixmap('exit243.png')
-        label2.setPixmap(pixmap)
-        label2.move(300, 50)
+        # label2 = QLabel(self)
+        # pixmap = QPixmap('exit243.png')
+        # label2.setPixmap(pixmap)
+        # label2.move(300, 50)
 
         # Show widgets
         self.show()
@@ -235,13 +237,19 @@ class MyMainWidget(QWidget):
 
     @staticmethod
     def updatefig(i):
+        # TODO optimize this method!
         # global x, y
         i += 1
         # plt.imshow(im2, extent=(0, 50, 0, 50))
         # data =
         # img_p.set_data(data)
         # self.canvas.draw()
-        # plt.clf()
+        plt.clf()
+        img = plt.imread(imagePath)
+        plt.imshow(img, extent=[0, 1000, 0, 1000])
+        axes = plt.gca()
+        axes.set_xlim([-100, 1100])
+        axes.set_ylim([-100, 1100])
         # plt.draw()
         # img = plt.imread(imagePath)
         global percent
@@ -255,18 +263,30 @@ class MyMainWidget(QWidget):
         global x
         global y
 
+        # print(x, k)
+
         if x >= k:
             x = k
+            im2 = plt.imread("tomatometer pics/ink (2).png")
+            # im2 = plt.imread("12.jpg"")
+            plt.imshow(im2, extent=(x-50, x+50, y-50, y+50))
+            x = 0
+            y = 0
+            # print(x, y)
+            # TODO fix splat when percent = 1
         else:
             x = i
+            y = a * (x - h) ** 2 + k
+            im2 = plt.imread("tomatometer pics/tomato-clipart-tomato5.png")
+            # im2 = plt.imread("exit243.png")
+            plt.imshow(im2, extent=(x-25, x+25, y-25, y+25))
 
-        y = a * (x - h) ** 2 + k
-
-        im2 = plt.imread("exit243.png")
-        plt.imshow(im2, extent=(x, x+25, y, y+25))
+        axes.set_aspect('auto')
+        plt.axis('off')  # hide axis
+        # print(i)
 
     # @staticmethod
-    def plot(cls):
+    def plot(self):
         ''' plot some random stuff '''
         # random data
         # data = [random.random() for i in range(10)]
@@ -274,7 +294,7 @@ class MyMainWidget(QWidget):
 
         # Adjust parabola based on savings value
         global percent
-        percent = cls.savings_calc() / cls.goal_calc()
+        percent = self.savings_calc() / self.goal_calc()
         # if percent > 1:
         #     percent = 1
         if percent > 1:
@@ -285,26 +305,25 @@ class MyMainWidget(QWidget):
         # h = 500 * percent    # adjusts midpoint, max 500
         # k = 1000 * percent   # adjusts height, max 1000
 
-        self.figure.clear()
+        # self.figure.clear()
 
         # add background image to plot. See
         # http://stackoverflow.com/questions/34458251/plot-over-an-image-background-in-python
-        img = plt.imread(imagePath)
-        # print(imagePath)
-        # subplot grid parameters encoded as a single integer. "111" means
-        # "1x1 grid, first subplot" and "234" means "2x3 grid, 4th subplot"
-        ax = self.figure.add_subplot(111)
-        ax.imshow(img, extent=[0, 1000, 0, 1000])
-        axes = plt.gca()
-        axes.set_xlim([0, 1000])
-        axes.set_ylim([0, 1000])
-        # automatically fills / stretches figure rectangle with data
-        axes.set_aspect('auto')
-        plt.axis('off')  # hide axis
+        # img = plt.imread(imagePath)
+        # # print(imagePath)
+        # # subplot grid parameters encoded as a single integer. "111" means
+        # # "1x1 grid, first subplot" and "234" means "2x3 grid, 4th subplot"
+        # ax = self.figure.add_subplot(111)
+        # ax.imshow(img, extent=[0, 1000, 0, 1000])
+        # axes = plt.gca()
+        # axes.set_xlim([0, 1000])
+        # axes.set_ylim([0, 1000])
+        # # automatically fills / stretches figure rectangle with data
+        # axes.set_aspect('auto')
+        # plt.axis('off')  # hide axis
 
         # plot data
         # ax.plot(data, '*-')
-        # TODO 1 Replace point with image
 
         # i = int(self.tableWidget.item(0, 1).text())
         # for i in range(0 To k):
@@ -321,12 +340,12 @@ class MyMainWidget(QWidget):
         # else:
         #     x += 100
 
-        ani = animation.FuncAnimation(cls.figure, cls.updatefig,
-                                      interval=100)
+        # print(percent*1000)
+        ani = animation.FuncAnimation(self.figure, self.updatefig, repeat=False,
+                                      interval=1, frames=int(percent*1000)+2)
         # init_func=cls.init_plot,
         # refresh canvas
         self.canvas.draw()
-        # TODO 1 see if you can recreate simple_animation.py here
 
     def createTable(self, rows):
         # Create table w/ two columns for proj descriptions and savings values
