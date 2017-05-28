@@ -28,14 +28,15 @@ import ctypes
 myappid = 'mycompany.myproduct.subproduct.version'  # arbitrary string
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
-x = 0
-y = 0
-percent = 0
 # projects = ['first project', 'second project', 'third project']
 # savings = [50000, 100000, 100001]
+x = y = a = h = k = percent = 0
 goal = ""
-imagePath = 'image.jpg'
+imagePath = 'background.png'
 anim_running = True
+img_background = plt.imread(imagePath)
+img_tomato = plt.imread("tomato.png")
+img_splat = plt.imread("splat.png")
 
 class App(QMainWindow):
 
@@ -48,7 +49,7 @@ class App(QMainWindow):
         self.height = 600
         self.initUI()
         # set window icon (see above for taskbar)
-        self.setWindowIcon(QIcon('exit243.png'))
+        self.setWindowIcon(QIcon('tomato.png'))
 
     def initUI(self):
         self.setWindowTitle(self.title)
@@ -64,19 +65,20 @@ class App(QMainWindow):
         # TODO menu: help: about: webkit pointing to Energy Trust SEM website
         # (note that this is not endorsed)
 
-        exitButton = QAction(QIcon('exit243.png'), 'Exit', self)
+        exitButton = QAction(QIcon('splat.png'), 'Exit', self)
         # exitButton.setShortcut('Ctrl+Q')
         exitButton.setShortcut('Ctrl+W')
         exitButton.setStatusTip('Exit application')
         exitButton.triggered.connect(self.close)
         fileMenu.addAction(exitButton)
 
-        ChangeBackgroundImage = QAction(QIcon('exit243.png'),
+        ChangeBackgroundImage = QAction(QIcon(imagePath),
                                         'Change Background Image', self)
         ChangeBackgroundImage.setStatusTip('Choose new background image from \
                                             disk')
         ChangeBackgroundImage.triggered.connect(self.openFileNameDialog)
         editMenu.addAction(ChangeBackgroundImage)
+        # TODO fix background image replacement
 
         # pass reference to the canvas to the App. Make a few changes
         # to the App initializer to accomodate canvas reference.
@@ -110,7 +112,7 @@ class App(QMainWindow):
             # MyMainWidget.background_image()
             # MyMainWidget.canvas.draw()
             # https://stackoverflow.com/questions/4618435/tkinter-canvas-access-from-a-separate-class
-            # TODO refer to mymainwidget from outside of the class
+            # TODO how to refer to mymainwidget from outside of the class
 
 
 class MyMainWidget(QWidget):
@@ -139,7 +141,6 @@ class MyMainWidget(QWidget):
         # Just a button connected to `plot` method
         self.button = QPushButton('Throw!')
         self.button.clicked.connect(self.plot)
-        # TODO enable button to run matplotlib animation
 
         # set the layout
         self.plotLayout = QVBoxLayout()
@@ -173,7 +174,6 @@ class MyMainWidget(QWidget):
 
         # self.labelGoal.doubleClicked.connect(self.dbl_click)
         # self.labelGoal.mousePressEvent = self.dbl_click
-        # TODO enable goal update
 
         self.textGoalEdit = QLineEdit()
         self.textGoalEdit.setFixedWidth(80)
@@ -192,7 +192,6 @@ class MyMainWidget(QWidget):
         self.tablelayout.addWidget(self.tableWidget)
         self.tablelayout.addLayout(self.SavingsGoalLayout)
 
-        # TODO update goal after clicking it
         # self.tablelayout.addWidget(button)
         # self.setLayout(self.tablelayout)
 
@@ -207,7 +206,6 @@ class MyMainWidget(QWidget):
         # pixmap = QPixmap('exit243.png')
         # label2.setPixmap(pixmap)
         # label2.move(300, 50)
-
 
         # Show widgets
         self.show()
@@ -268,60 +266,61 @@ class MyMainWidget(QWidget):
     def background_image(cls):
         img = plt.imread(imagePath)
         # ax = cls.figure.add_subplot(111)
-        # ax.imshow(img, extent=[0, 1000, 0, 1000])
+        # ax.imshow(img_background, extent=[0, 1000, 0, 1000])
         print(imagePath)
         cls.canvas.draw()
 
     # initialization function: plot the background of each frame
     @staticmethod
     def init_plot():
-        plt.imshow(img, extent=(0, 1000, 0, 1000))
+        global img_background
+        plt.imshow(img_background, extent=(0, 1000, 0, 1000))
 
     @staticmethod
     def updatefig(i):
         # TODO optimize this method!
         # global x, y
         i += 1
-        # plt.imshow(im2, extent=(0, 50, 0, 50))
+        # plt.imshow(img_tomato, extent=(0, 50, 0, 50))
         # data =
         # img_p.set_data(data)
         # self.canvas.draw()
         plt.clf()
-        img = plt.imread(imagePath)
-        plt.imshow(img, extent=[0, 1000, 0, 1000])
+        # img_background = plt.imread(imagePath)
+        global img_background, img_tomato, img_splat, x, y
+        plt.imshow(img_background, extent=[0, 1000, 0, 1000])
         axes = plt.gca()
         axes.set_xlim([-100, 1100])
         axes.set_ylim([-100, 1100])
         # plt.draw()
-        # img = plt.imread(imagePath)
-        global percent
-        if percent > 1:
-            percent = 1
+        # img_background = plt.imread(imagePath)
+        # global percent
+        # if percent > 1:
+        #     percent = 1
 
         # define parabola based on magnitude of kwh/joules
-        a = -0.004 / percent  # adjusts stretch, min -100, max -0.004
-        h = 500 * percent    # adjusts midpoint, max 500
-        k = 1000 * percent   # adjusts height, max 1000
-        global x
-        global y
+        # a = -0.004 / percent  # adjusts stretch, min -100, max -0.004
+        # h = 500 * percent    # adjusts midpoint, max 500
+        # k = 1000 * percent   # adjusts height, max 1000
 
         # print(x, k)
 
         if x >= k:
+            # Splat
             x = k
-            im2 = plt.imread("tomatometer pics/ink (2).png")
-            # im2 = plt.imread("12.jpg"")
-            plt.imshow(im2, extent=(x-50, x+50, y-50, y+50))
-            x = 0
-            y = 0
+            # img_tomato = plt.imread("tomatometer pics/ink (2).png")
+            # img_tomato = plt.imread("12.jpg")
+            plt.imshow(img_splat, extent=(x - 50, x + 50, y - 50, y + 50))
+            x = y = 0
             # print(x, y)
             # TODO fix splat when percent = 1
         else:
+            # Parabola
             x = i
             y = a * (x - h) ** 2 + k
-            im2 = plt.imread("tomatometer pics/tomato-clipart-tomato5.png")
-            # im2 = plt.imread("exit243.png")
-            plt.imshow(im2, extent=(x-25, x+25, y-25, y+25))
+            # img_tomato = plt.imread("tomatometer pics/tomato-clipart-tomato5.png")
+            # img_tomato = plt.imread("exit243.png")
+            plt.imshow(img_tomato, extent=(x - 25, x + 25, y - 25, y + 25))
 
         axes.set_aspect('auto')
         plt.axis('off')  # hide axis
@@ -337,26 +336,25 @@ class MyMainWidget(QWidget):
         # Adjust parabola based on savings value
         global percent
         percent = self.savings_calc() / self.goal_calc()
-        # if percent > 1:
-        #     percent = 1
         if percent > 1:
             percent = 1
 
         # define parabola based on magnitude of kwh/joules
-        # a = -0.004 / percent  # adjusts stretch, min -100, max -0.004
-        # h = 500 * percent    # adjusts midpoint, max 500
-        # k = 1000 * percent   # adjusts height, max 1000
+        global a, h, k
+        a = -0.004 / percent  # adjusts stretch, min -100, max -0.004
+        h = 500 * percent    # adjusts midpoint, max 500
+        k = 1000 * percent   # adjusts height, max 1000
 
         # self.figure.clear()
 
         # add background image to plot. See
         # http://stackoverflow.com/questions/34458251/plot-over-an-image-background-in-python
-        # img = plt.imread(imagePath)
+        # img_background = plt.imread(imagePath)
         # # print(imagePath)
         # # subplot grid parameters encoded as a single integer. "111" means
         # # "1x1 grid, first subplot" and "234" means "2x3 grid, 4th subplot"
         # ax = self.figure.add_subplot(111)
-        # ax.imshow(img, extent=[0, 1000, 0, 1000])
+        # ax.imshow(img_background, extent=[0, 1000, 0, 1000])
         # axes = plt.gca()
         # axes.set_xlim([0, 1000])
         # axes.set_ylim([0, 1000])
@@ -385,13 +383,12 @@ class MyMainWidget(QWidget):
 
         # print(percent*1000)
         ani = animation.FuncAnimation(self.figure, self.updatefig, repeat=False,
-                                      interval=1, frames=int(percent*1000)+2)
-        # init_func=cls.init_plot,
-        # refresh canvas
+                                      interval=10, frames=int(percent*1000)+2)
+        # init_func = self.init_plot,
 
         # Pause and restart animation
         global anim_running
-        print(anim_running)
+        # print(anim_running)
         if anim_running:
             ani.event_source.stop()
             anim_running = False
