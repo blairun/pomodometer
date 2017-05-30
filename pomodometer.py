@@ -221,8 +221,10 @@ class MyMainWidget(QWidget):
             print("error")
 
         # set min and max
-        if goal < 1: goal = 1
-        if goal > 9999999999: goal = 9999999999
+        if goal < 1:
+            goal = 1
+        if goal > 9999999999:
+            goal = 9999999999
 
         # update persistent goal and textbox
         with open('goal.txt', 'w') as f:
@@ -377,6 +379,7 @@ class MyMainWidget(QWidget):
                     self.tableWidget.rowCount():
                 rowPosition = self.tableWidget.rowCount()
                 self.tableWidget.insertRow(rowPosition)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
