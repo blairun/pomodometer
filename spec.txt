@@ -1,0 +1,9 @@
+
+pyinstaller pomodometer.py
+
+pyinstaller --add-data *.*;. pomodometer.py
+
+pyinstaller --add-data *.*;. --windowed --icon=tomato.png pomodometer.py
+
+onefile doesn't work
+pyinstaller --add-data *.*;. --onefile --windowed pomodometer.py
