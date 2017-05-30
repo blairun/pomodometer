@@ -26,9 +26,9 @@ ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 # savings = [50000, 100000, 100001]
 x = y = a = h = k = percent = 0
 goal = ""
-imagePath = 'background.png'
+backgroundImagePath = 'background.png'
 anim_running = True
-img_background = plt.imread(imagePath)
+img_background = plt.imread(backgroundImagePath)
 img_tomato = plt.imread("tomato.png")
 img_splat = plt.imread("splat.png")
 
@@ -38,9 +38,9 @@ class App(QMainWindow):
     def __init__(self):
         super().__init__()
         self.title = 'pomodometer'
-        self.left = 250
-        self.top = 250
-        self.width = 1000
+        self.left = 200
+        self.top = 200
+        self.width = 1200
         self.height = 600
         self.initUI()
         # set window icon (see above for taskbar)
@@ -67,10 +67,9 @@ class App(QMainWindow):
         exitButton.triggered.connect(self.close)
         fileMenu.addAction(exitButton)
 
-        ChangeBackgroundImage = QAction(QIcon(imagePath),
+        ChangeBackgroundImage = QAction(QIcon(backgroundImagePath),
                                         'Change Background Image', self)
-        ChangeBackgroundImage.setStatusTip('Choose new background image from \
-                                            disk')
+        ChangeBackgroundImage.setStatusTip('Choose new background image from disk')
         ChangeBackgroundImage.triggered.connect(self.openFileNameDialog)
         editMenu.addAction(ChangeBackgroundImage)
 
@@ -84,18 +83,18 @@ class App(QMainWindow):
 
         self.show()
 
-    # TODO fix background image replacement
     # File picker for background image replacement
     def openFileNameDialog(self):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
-        fileName, _ = QFileDialog.getOpenFileName(self, "Choose new \
-            background image", "", "All Files (*);; Image Files \
+        fileName, _ = QFileDialog.getOpenFileName(self, "Choose new background image",
+                                                  "", "All Files (*);; Image Files \
             (*.jpg);; Image Files (*.png)", options=options)
         if fileName:
             # print(fileName)
-            global imagePath
-            imagePath = fileName
+            global backgroundImagePath, img_background
+            backgroundImagePath = fileName
+            img_background = plt.imread(backgroundImagePath)
             self.table_widget = MyMainWidget(self)
             self.setCentralWidget(self.table_widget)
             global x
@@ -231,16 +230,16 @@ class MyMainWidget(QWidget):
             f.truncate()
             # f.write(str(goal))
             f.write(str('{:,}'.format(goal)))
-            print(goal)
+            # print(goal)
         self.textGoalEdit.setText(str('{:,}'.format(goal)))
 
     # Not used
     @classmethod
     def background_image(cls):
-        img = plt.imread(imagePath)
+        img = plt.imread(backgroundImagePath)
         # ax = cls.figure.add_subplot(111)
         # ax.imshow(img_background, extent=[0, 1000, 0, 1000])
-        print(imagePath)
+        print(backgroundImagePath)
         cls.canvas.draw()
 
     # initialization function: plot the background of each frame
@@ -257,18 +256,18 @@ class MyMainWidget(QWidget):
         global img_background, img_tomato, img_splat, x, y
 
         plt.clf()
-        plt.imshow(img_background, extent=[0, 1000, 0, 1000])
+        plt.imshow(img_background, extent=[-100, 1100, -100, 1100])
         axes = plt.gca()
         axes.set_xlim([-100, 1100])
         axes.set_ylim([-100, 1100])
 
-        if x >= k:
+        if i >= k:
             # draw splat
             x = k
             plt.imshow(img_splat, extent=(x - 50, x + 50, y - 50, y + 50))
             x = y = 0
+
             # print(x, y)
-            # TODO fix splat when percent = 1
         else:
             # draw parabola
             x = i
@@ -288,7 +287,7 @@ class MyMainWidget(QWidget):
         if percent > 1:
             percent = 1
 
-        # define parabola based on magnitude of kwh/joules
+        # define parabola based on magnitude of savings
         global a, h, k
         a = -0.004 / percent  # adjusts stretch, min -100, max -0.004
         h = 500 * percent    # adjusts midpoint, max 500
@@ -302,7 +301,7 @@ class MyMainWidget(QWidget):
 
         # print(percent*1000)
         ani = animation.FuncAnimation(self.figure, self.updatefig, repeat=False,
-                                      interval=10, frames=int(percent*1000)+2)
+                                      interval=1, frames=int(percent*1000)+3)
         # init_func = self.init_plot,
 
         # TODO Pause and restart animation
@@ -384,5 +383,5 @@ if __name__ == '__main__':
     ex = App()
     sys.exit(app.exec_())
     # unittest.main()
-    # TODO package app
-    # TODO 2 learn how to store classes and functions in separate .py files
+    # TODO 1 package app
+    # TODO learn how to store classes and functions in separate .py files
