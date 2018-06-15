@@ -26,11 +26,11 @@ ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 # savings = [50000, 100000, 100001]
 x = y = a = h = k = percent = 0
 goal = ""
-backgroundImagePath = 'background.png'
+backgroundImagePath = "background_.png"
 anim_running = True
 img_background = plt.imread(backgroundImagePath)
-img_tomato = plt.imread("tomato.png")
-img_splat = plt.imread("splat.png")
+img_tomato = plt.imread("tomato_.png")
+img_splat = plt.imread("splat_.png")
 
 
 class App(QMainWindow):
@@ -44,7 +44,7 @@ class App(QMainWindow):
         self.height = 600
         self.initUI()
         # set window icon (see above for taskbar)
-        self.setWindowIcon(QIcon('tomato.png'))
+        self.setWindowIcon(QIcon('tomato_.png'))
 
     def initUI(self):
         self.setWindowTitle(self.title)
