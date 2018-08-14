@@ -74,7 +74,7 @@ class App(QMainWindow):
         editMenu.addAction(ChangeBackgroundImage)
 
         # pass reference to the canvas to the App. Make a few changes
-        # to the App initializer to accomodate canvas reference.
+        # to the App initializer to accommodate canvas reference.
         # Then bind it to App instance
         self.table_widget = MyMainWidget(self)
         self.setCentralWidget(self.table_widget)
@@ -280,6 +280,34 @@ class MyMainWidget(QWidget):
         plt.axis('off')  # hide axis
         # print(i)
 
+    @staticmethod
+    def data_gen():
+        percent = 0.1
+        a = -0.004 / percent  # adjusts stretch, min -100, max -0.004
+        h = 500 * percent    # adjusts midpoint, max 500
+        k = 1000 * percent   # adjusts height, max 1000
+        gen_list = ([x, a * (x - h) ** 2 + k] for x in np.arange(0,1000 * percent,1))
+        return gen_list
+ 
+    @staticmethod
+    def init():
+        ax.set_ylim(-10, 1000)
+        ax.set_xlim(-10, 1000)
+        return point
+ 
+    fig, ax = plt.subplots()
+    point, = ax.plot([0], [0], 'go')
+    point.set_data(0, 0)
+    ax.grid()
+ 
+    @staticmethod
+    def run(data):
+    
+        x, y = data
+        point.set_data(x, y)
+        
+        return point
+
     # @staticmethod
     def plot(self):
 
@@ -302,8 +330,9 @@ class MyMainWidget(QWidget):
         # ax.plot(x, y, 'o', color='firebrick')
 
         # print(percent*1000)
-        ani = animation.FuncAnimation(self.figure, self.updatefig, repeat=False,
-                                      interval=1, frames=int(percent*1000)+3)
+        # ani = animation.FuncAnimation(self.figure, self.data_gen, repeat=False,
+        #                               interval=1, frames=int(percent*1000)+3)
+        ani = animation.FuncAnimation(self.fig, self.run, self.data_gen, init_func=self.init,interval=25, repeat=False)
         # init_func = self.init_plot,
 
         # TODO Pause and restart animation
